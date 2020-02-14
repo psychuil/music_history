@@ -19,9 +19,8 @@ def getLastFmDF(user, years, months):
         for month in months:
             fetchDict[year][month] = 0
 
-
     def getLastFmData(user, year, month):
-        df = pd.DataFrame(columns=['month', 'artist', 'count'])
+        df = pd.DataFrame(columns=['id','year', 'month', 'artist', 'count'])
         res = requests.get(
             f'https://www.last.fm/user/{user}/library/artists?from={year}-{month:02d}-01&rangetype=1month')
         soup = BeautifulSoup(res.content, 'lxml')
@@ -35,7 +34,7 @@ def getLastFmDF(user, years, months):
                     if row.attrs['title'].replace(' ', '+') in count.attrs['href']:
                         df = df.append({
                             'id': f'{year}{month:02d}',
-                            'year': int(year),
+                            'year': year,
                             'month': f'{month:02d}',
                             'artist': row.attrs['title'],
                             'count': int(
@@ -51,7 +50,6 @@ def getLastFmDF(user, years, months):
         fetchDict[year][month] = 1
         drawProgress(year)
 
-
     def countProg():
         count = 0
         sum = 0
@@ -61,7 +59,6 @@ def getLastFmDF(user, years, months):
                 if fetchDict[year][month] == 1:
                     sum += 1
         return int(sum / count * 100)
-
 
     def drawProgress(yearToGet):
         yearStrings = defaultdict(str)
@@ -73,9 +70,6 @@ def getLastFmDF(user, years, months):
             yearStrings[year] = yearString
         sys.stdout.write(f'\r[{countProg():02d}%] {yearStrings[yearToGet]}')
         sys.stdout.flush()
-
-
-
 
     finalDF = pd.DataFrame(columns=['id', 'year', 'month', 'artist', 'count'])
     for year in years:
