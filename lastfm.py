@@ -87,6 +87,6 @@ for year in YEARS:
 
 
 
-# draw_barchart('200601')
+draw_barchart('200601')
 animator = animation.FuncAnimation(fig, draw_barchart, frames=df['month'].drop_duplicates().values)
 HTML(animator.to_jshtml())
