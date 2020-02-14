@@ -1,18 +1,18 @@
 from bs4 import BeautifulSoup
-import sys, requests, threading
+import sys, requests, threading, argparse
 import pandas as pd
 from collections import defaultdict
 
-MONTHS = range(1, 13)
-YEARS = range(2005, 2021)
-USER = 'psychuil'
+parser = argparse.ArgumentParser(description='Fetches user listening history from last.fm')
+parser.add_argument('--user', default='psychuil')
+parser.add_argument('--years', default='2005-2021')
+parser.add_argument('--filename', default=f'lastFM')
 # https://towardsdatascience.com/bar-chart-race-in-python-with-matplotlib-8e687a5c8a41
 
 
 def getLastFmDF(user, years, months):
     threadList = []
     results = {}
-    # history = pd.DataFrame(columns=['year', 'month', 'artist', 'count'])
     fetchDict = defaultdict(list)
     for year in years:
         fetchDict[year] = defaultdict(int)
@@ -43,14 +43,14 @@ def getLastFmDF(user, years, months):
                         }, ignore_index=True)
             except:
                 pass
-        # print(f'Done with {month:02d}/{year}')
-        fetchDict[year][month] = 1
-        drawProgress(year)
         return df
 
     def appendToDf(user, year, month):
         newData = getLastFmData(user, year, month)
         results[f'{year}{month}'] = newData
+        fetchDict[year][month] = 1
+        drawProgress(year)
+
 
     def countProg():
         count = 0
@@ -62,15 +62,16 @@ def getLastFmDF(user, years, months):
                     sum += 1
         return int(sum / count * 100)
 
+
     def drawProgress(yearToGet):
         yearStrings = defaultdict(str)
         for year in fetchDict:
-            yearString = f'[{countProg():02d}%] {year}'
+            yearString = f'({year})'
             for month in fetchDict[year]:
-                monthStatus = '✓' if fetchDict[year][month] == 1 else f'{month}'
+                monthStatus = '  ' if fetchDict[year][month] != 1 else f'{month:02d}'
                 yearString = f'{yearString} {monthStatus}'
             yearStrings[year] = yearString
-        sys.stdout.write(f'\r {yearStrings[yearToGet]}')
+        sys.stdout.write(f'\r[{countProg():02d}%] {yearStrings[yearToGet]}')
         sys.stdout.flush()
 
 
@@ -91,8 +92,11 @@ def getLastFmDF(user, years, months):
 
 
 if __name__ == '__main__':
-    myTasteDF = getLastFmDF(USER, YEARS, MONTHS)
-
+    args = parser.parse_args()
+    years = args.years.split('-')
+    years = range(int(years[0]),int(years[1]))
+    print(f'Fetching data for {args.user} for {list(years)}')
+    myTasteDF = getLastFmDF(args.user, years, range(1, 13))
     myTasteDF.sort_values(by=['id', 'count'])
     print(myTasteDF)
-    myTasteDF.to_csv(f'lastFM_{USER}.csv')
+    myTasteDF.to_csv(f'{args.filename}_{args.user}.csv')
