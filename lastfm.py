@@ -67,8 +67,8 @@ def getLastFmDF(user, years, months):
         for year in fetchDict:
             yearString = f'[{countProg():02d}%] {year}'
             for month in fetchDict[year]:
-                monthStatus = '✓' if fetchDict[year][month] == 1 else ' '
-                yearString = f'{yearString} {month}{monthStatus}'
+                monthStatus = '✓' if fetchDict[year][month] == 1 else f'{month}'
+                yearString = f'{yearString} {monthStatus}'
             yearStrings[year] = yearString
         sys.stdout.write(f'\r {yearStrings[yearToGet]}')
         sys.stdout.flush()
