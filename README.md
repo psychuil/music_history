@@ -12,7 +12,7 @@ Download it, install the required libreries, and run via cli.
 I wanna figure out poetry, so no requirements.txt for now. Just pip it.
 
 ```
-pip install bs4, requests, threading, argparse, pandas, lxml
+pip install bs4 requests threading argparse pandas lxml
 ```
 
 ### Using
